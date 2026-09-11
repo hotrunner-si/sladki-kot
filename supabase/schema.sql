@@ -49,6 +49,7 @@ create or replace function public.set_updated_at() returns trigger language plpg
 create trigger suppliers_updated before update on public.suppliers for each row execute function public.set_updated_at();
 create trigger products_updated before update on public.products for each row execute function public.set_updated_at();
 create or replace function public.is_admin() returns boolean language sql stable security definer set search_path = public as $$ select exists(select 1 from public.profiles where id = auth.uid() and role = 'admin') $$;
+create or replace function public.is_inventory() returns boolean language sql stable security definer set search_path = public as $$ select exists(select 1 from public.profiles where id = auth.uid() and role = 'inventory') $$;
 
 alter table public.profiles enable row level security; alter table public.suppliers enable row level security; alter table public.products enable row level security;
 alter table public.inventory_counts enable row level security; alter table public.inventory_count_items enable row level security;

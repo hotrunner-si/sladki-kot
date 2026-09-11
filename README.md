@@ -57,6 +57,8 @@ values ('UUID-ZAPOSLENEGA', 'Miha Kovač', 'inventory');
 
 Če ste že izvedli prvotni `schema.sql` in `seed.sql`, v SQL Editorju izvedite še [`supabase/migrate_current_inventory.sql`](supabase/migrate_current_inventory.sql). Skript doda nastavitve za štetje po platojih/paketih, nato izbriše začetne testne artikle, popise in dobave ter jih nadomesti z aktualnim seznamom in začetnim popisom. Profilov in Auth uporabnikov ne spreminja.
 
+Če želite pozneje samo dodati nov celovit popis z originalnimi začetnimi količinami, uporabite [`supabase/reset_to_original_stock.sql`](supabase/reset_to_original_stock.sql). Ta zgodovine ne briše; doda en nov zaključen popis.
+
 Če profil za prijavljenega uporabnika ni ustvarjen, aplikacija uporabnika obravnava kot omejenega uporabnika; profil vedno dodajte takoj po ustvarjanju Auth uporabnika.
 
 ## Vloge in varnost
