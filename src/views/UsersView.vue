@@ -1,0 +1,4 @@
+<script setup>
+import { onMounted,ref } from 'vue'; import { supabase } from '../lib/supabase'
+const users=ref([]),loading=ref(true),error=ref('');onMounted(async()=>{try{const {data,error:e}=await supabase.from('profiles').select('*').order('created_at');if(e)throw e;users.value=data}catch{error.value='Uporabnikov ni bilo mogoče naložiti.'}finally{loading.value=false}})
+</script><template><section class="page"><header><p class="eyebrow">ADMINISTRACIJA</p><h1>Uporabniki</h1><p class="muted">Uporabnike in njihove vloge za začetek upravljajte v Supabase.</p></header><p v-if="error" class="error">{{error}}</p><div v-if="loading" class="center-state">Nalagam uporabnike …</div><div v-for="user in users" v-else class="list-row"><span><strong>{{user.full_name || 'Brez imena'}}</strong><small>{{user.id}}</small></span><span>{{user.role === 'admin'?'Administrator':'Popis zaloge'}}</span></div></section></template>

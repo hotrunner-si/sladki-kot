@@ -1,0 +1,5 @@
+<script setup>
+import { ref } from 'vue'; import { useRouter } from 'vue-router'; import { useAuth } from '../composables/useAuth'
+const email=ref(''),password=ref(''),loading=ref(false),error=ref(''); const router=useRouter(); const {signIn,isAdmin}=useAuth()
+async function submit(){ loading.value=true;error.value='';try{await signIn(email.value,password.value);router.replace(isAdmin()?'/dashboard':'/count')}catch{error.value='Prijava ni uspela. Preverite e-poštni naslov in geslo.'}finally{loading.value=false} }
+</script><template><section class="login"><div><p class="eyebrow">VELIKA PLANINA</p><h1>Sladki kot</h1><p class="muted">Upravljanje zaloge</p></div><form class="card stack" @submit.prevent="submit"><label>E-pošta<input v-model="email" type="email" autocomplete="email" required /></label><label>Geslo<input v-model="password" type="password" autocomplete="current-password" required /></label><p v-if="error" class="error">{{error}}</p><button :disabled="loading">{{loading?'Prijavljam …':'Prijava'}}</button></form></section></template>
