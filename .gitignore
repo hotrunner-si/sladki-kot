@@ -1,0 +1,14 @@
+# Lokalna konfiguracija in skrivnosti
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Gradnja in odvisnosti
+node_modules/
+dist/
+
+# Lokalni uredniki in operacijski sistem
+.DS_Store
+Thumbs.db
+.vscode/
