@@ -1,1 +1,36 @@
-.product-line{min-height:76px}.product-name{gap:5px}.product-title{font-size:.96rem;font-weight:520;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.current-quantity{font-size:1.08rem;color:#284f30;font-weight:850}.product-date{gap:4px}.product-date small{font-size:.69rem;color:#687768}.product-date strong{font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}.product-active{color:#27703c}.product-inactive{color:#9a4f39}
+.product-line {
+  min-height: 76px;
+}
+.product-name {
+  gap: 5px;
+}
+.product-title {
+  font-size: 0.96rem;
+  font-weight: 520;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.current-quantity {
+  font-size: 1.08rem;
+  color: #284f30;
+  font-weight: 850;
+}
+.product-date {
+  gap: 4px;
+}
+.product-date small {
+  font-size: 0.69rem;
+  color: #687768;
+}
+.product-date strong {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.product-active {
+  color: #27703c;
+}
+.product-inactive {
+  color: #9a4f39;
+}

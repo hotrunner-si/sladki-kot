@@ -1,1 +1,107 @@
-.more-page{padding-bottom:105px}.more-header{margin-bottom:20px}.more-header h1{font-size:2.1rem}.account-panel{display:flex;align-items:center;gap:12px;padding:14px;background:#edf5ea;border:1px solid #d4e5cf;border-radius:14px;margin:18px 0 28px}.account-avatar{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#2a6133;color:white;font-size:1.1rem;font-weight:800}.account-panel div{display:grid;gap:3px}.account-panel strong{font-size:.95rem}.account-panel small{color:#527053;font-size:.78rem}.more-label{font-size:.72rem;letter-spacing:.09em;font-weight:800;color:#768574;margin:0 0 8px 3px}.more-menu{background:#fff;border:1px solid #e0e8dd;border-radius:14px;overflow:hidden}.more-item{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:10px;padding:15px 14px;text-decoration:none;color:#1b251b;border-bottom:1px solid #edf1eb}.more-item:last-child{border-bottom:0}.more-item span:nth-child(2){display:grid;gap:3px}.more-item strong{font-size:.96rem}.more-item small{font-size:.76rem;color:#6d7a6b}.more-item b{font-size:1.4rem;font-weight:400;color:#72866f}.more-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#edf4ea;color:#35643b;font-size:1rem}.signout-button{width:100%;margin-top:24px;background:#fff;color:#8a352f;border:1px solid #e7c8c4;display:flex;align-items:center;justify-content:center;gap:8px}.signout-button span{font-size:1.15rem}
+.more-page {
+  padding-bottom: 105px;
+}
+.more-header {
+  margin-bottom: 20px;
+}
+.more-header h1 {
+  font-size: 2.1rem;
+}
+.account-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: #edf5ea;
+  border: 1px solid #d4e5cf;
+  border-radius: 14px;
+  margin: 18px 0 28px;
+}
+.account-avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #2a6133;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+.account-panel div {
+  display: grid;
+  gap: 3px;
+}
+.account-panel strong {
+  font-size: 0.95rem;
+}
+.account-panel small {
+  color: #527053;
+  font-size: 0.78rem;
+}
+.more-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.09em;
+  font-weight: 800;
+  color: #768574;
+  margin: 0 0 8px 3px;
+}
+.more-menu {
+  background: #fff;
+  border: 1px solid #e0e8dd;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.more-item {
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 14px;
+  text-decoration: none;
+  color: #1b251b;
+  border-bottom: 1px solid #edf1eb;
+}
+.more-item:last-child {
+  border-bottom: 0;
+}
+.more-item span:nth-child(2) {
+  display: grid;
+  gap: 3px;
+}
+.more-item strong {
+  font-size: 0.96rem;
+}
+.more-item small {
+  font-size: 0.76rem;
+  color: #6d7a6b;
+}
+.more-item b {
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #72866f;
+}
+.more-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #edf4ea;
+  color: #35643b;
+  font-size: 1rem;
+}
+.signout-button {
+  width: 100%;
+  margin-top: 24px;
+  background: #fff;
+  color: #8a352f;
+  border: 1px solid #e7c8c4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.signout-button span {
+  font-size: 1.15rem;
+}

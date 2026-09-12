@@ -2,15 +2,21 @@
 export function calculateProductForecast({ counts = [], deliveries = [], product = {}, supplier = {} }) {
   const completed = counts.filter(c => c.status === 'completed' && c.quantity !== null && c.quantity !== undefined)
     .sort((a, b) => new Date(a.completed_at || a.date) - new Date(b.completed_at || b.date)).slice(-5)
-  const currentQuantity = completed.length ? Number(completed.at(-1).quantity) : null
+  const lastCount = completed.at(-1)
+  const confirmedDeliveries = deliveries.filter(d => d.received_at || d.delivery_date || d.date)
+  const stockAddedAfterCount = lastCount ? confirmedDeliveries.filter(d => {
+    const date = new Date(d.received_at || d.delivery_date || d.date)
+    return date > new Date(lastCount.completed_at || lastCount.date)
+  }).reduce((sum, d) => sum + Number(d.quantity || 0), 0) : 0
+  const currentQuantity = lastCount ? Number(lastCount.quantity) + stockAddedAfterCount : null
   const intervals = []
   for (let i = 1; i < completed.length; i++) {
     const previous = completed[i - 1], next = completed[i]
     const start = new Date(previous.completed_at || previous.date), end = new Date(next.completed_at || next.date)
     const days = (end - start) / 86400000
     if (days <= 0) continue
-    const delivered = deliveries.filter(d => {
-      const date = new Date(d.delivery_date || d.date)
+    const delivered = confirmedDeliveries.filter(d => {
+      const date = new Date(d.received_at || d.delivery_date || d.date)
       return date > start && date <= end
     }).reduce((sum, d) => sum + Number(d.quantity || 0), 0)
     const usage = Number(previous.quantity) + delivered - Number(next.quantity)
@@ -30,7 +36,7 @@ export function calculateProductForecast({ counts = [], deliveries = [], product
     reorderInDays = daysRemaining - reorderThresholdDays
     status = daysRemaining <= reorderThresholdDays ? 'critical' : daysRemaining <= reorderThresholdDays + 3 ? 'warning' : 'ok'
   }
-  return { currentQuantity, averageDailyUsage, daysRemaining, effectiveLeadTimeDays, safetyStockDays, reorderThresholdDays, reorderInDays, status, hasEnoughData }
+  return { currentQuantity, countedQuantity: lastCount ? Number(lastCount.quantity) : null, stockAddedAfterCount, lastCountAt: lastCount?.completed_at || lastCount?.date || null, averageDailyUsage, daysRemaining, effectiveLeadTimeDays, safetyStockDays, reorderThresholdDays, reorderInDays, status, hasEnoughData }
 }
 
 export const statusText = { critical: 'NAROČI DANES', warning: 'Naroči kmalu', ok: 'Zaloga OK', unknown: 'Ni dovolj podatkov', out_of_stock: 'NI ZALOGE' }
