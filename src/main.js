@@ -2,10 +2,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import ArrowIcon from './components/ArrowIcon.vue'
+import TrashButton from './components/TrashButton.vue'
 import './assets/main.css'
 import './assets/products.css'
 import './assets/products-list.css'
 import './assets/more.css'
 import './assets/admin-lists.css'
 import './assets/variables.css'
-createApp(App).component('ArrowIcon', ArrowIcon).use(router).mount('#app')
+createApp(App).component('ArrowIcon', ArrowIcon).component('TrashButton', TrashButton).use(router).mount('#app')

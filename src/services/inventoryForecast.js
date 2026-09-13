@@ -28,15 +28,15 @@ export function calculateProductForecast({ counts = [], deliveries = [], product
   const averageDailyUsage = hasEnoughData ? totalUsage / totalDays : null
   const daysRemaining = currentQuantity !== null && averageDailyUsage > 0 ? currentQuantity / averageDailyUsage : null
   const effectiveLeadTimeDays = Number(product.lead_time_days ?? supplier.default_lead_time_days ?? 0)
-  const safetyStockDays = Number(product.safety_stock_days ?? 0)
-  const reorderThresholdDays = effectiveLeadTimeDays + safetyStockDays
+  const safetyStockQuantity = Number(product.safety_stock_quantity ?? 0)
+  const reorderPointQuantity = safetyStockQuantity + (hasEnoughData ? averageDailyUsage * effectiveLeadTimeDays : 0)
   let status = 'unknown', reorderInDays = null
   if (currentQuantity === 0) status = 'out_of_stock'
   else if (daysRemaining !== null) {
-    reorderInDays = daysRemaining - reorderThresholdDays
-    status = daysRemaining <= reorderThresholdDays ? 'critical' : daysRemaining <= reorderThresholdDays + 3 ? 'warning' : 'ok'
+    reorderInDays = (currentQuantity - reorderPointQuantity) / averageDailyUsage
+    status = currentQuantity <= reorderPointQuantity ? 'critical' : currentQuantity <= reorderPointQuantity + averageDailyUsage * 3 ? 'warning' : 'ok'
   }
-  return { currentQuantity, countedQuantity: lastCount ? Number(lastCount.quantity) : null, stockAddedAfterCount, lastCountAt: lastCount?.completed_at || lastCount?.date || null, averageDailyUsage, daysRemaining, effectiveLeadTimeDays, safetyStockDays, reorderThresholdDays, reorderInDays, status, hasEnoughData }
+  return { currentQuantity, countedQuantity: lastCount ? Number(lastCount.quantity) : null, stockAddedAfterCount, lastCountAt: lastCount?.completed_at || lastCount?.date || null, averageDailyUsage, daysRemaining, effectiveLeadTimeDays, safetyStockQuantity, reorderPointQuantity, reorderInDays, status, hasEnoughData }
 }
 
 export const statusText = { critical: 'NAROČI DANES', warning: 'Naroči kmalu', ok: 'Zaloga OK', unknown: 'Ni dovolj podatkov', out_of_stock: 'NI ZALOGE' }

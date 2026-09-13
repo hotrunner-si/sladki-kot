@@ -6,6 +6,7 @@ import { getProducts } from '../services/data'
 const tab = ref('ordered'), products = ref([]), deliveries = ref([]), receivedItems = ref([])
 const orderProductId = ref(''), expectedDate = ref(new Date().toISOString().slice(0, 10)), orderQuantity = ref(''), receivedQuantities = ref({})
 const manualProductId = ref(''), manualQuantity = ref(''), showOrderForm = ref(false), showManualForm = ref(false)
+const pendingDeleteItem = ref(null)
 const loading = ref(true), saving = ref(false), error = ref(''), message = ref('')
 const today = () => new Date().toLocaleDateString('en-CA')
 const formatDate = value => value ? new Date(value).toLocaleDateString('sl-SI') : '—'
@@ -59,12 +60,11 @@ async function confirmReceipt(item) {
 }
 
 async function discardReceipt(item) {
-  if (!confirm(`Odstranim ${item.products.name} iz nove zaloge?`)) return
   saving.value = true; error.value = ''; message.value = ''
   try {
     const { error: deleteError } = await supabase.from('delivery_items').delete().eq('id', item.id).is('received_at', null)
     if (deleteError) throw deleteError
-    message.value = `${item.products.name} je odstranjen iz nove zaloge.`; await load()
+    message.value = `${item.products.name} je odstranjen iz dobav.`; pendingDeleteItem.value = null; await load()
   } catch { error.value = 'Izdelka ni bilo mogoče odstraniti.' }
   finally { saving.value = false }
 }
@@ -93,13 +93,14 @@ onMounted(load)
     <template v-else-if="tab === 'ordered'">
       <div class="section-heading"><div><h2>Naročeni izdelki</h2><p class="muted">Izdelki na poti in predvideni datumi dostave</p></div><button @click="showOrderForm=!showOrderForm">Dodaj naročilo</button></div>
       <form v-if="showOrderForm" class="card stack delivery-form" @submit.prevent="saveOrder"><label>Izdelek<select v-model="orderProductId"><option value="">Izberite izdelek</option><option v-for="p in products.filter(item => item.active)" :key="p.id" :value="p.id">{{p.name}} ({{p.unit}})</option></select></label><label>Predvideni datum dostave<input v-model="expectedDate" type="date" required /></label><label>Naročena količina<input v-model="orderQuantity" type="number" min="0.001" step="0.001" inputmode="decimal" required /></label><div class="form-actions"><button type="button" class="secondary" @click="showOrderForm=false">Prekliči</button><button :disabled="saving">Shrani naročilo</button></div></form>
-      <div v-if="!ordered.length" class="delivery-empty">Trenutno ni izdelkov na poti.</div><div v-else class="delivery-list"><article v-for="item in ordered" :key="item.id" class="delivery-item"><div><strong>{{item.products.name}}</strong><small>{{item.delivery.suppliers?.name}} · {{item.quantity}} {{item.products.unit}}</small></div><time><small>Predvidena dostava</small>{{formatDate(item.delivery.delivery_date)}}</time></article></div>
+      <div v-if="!ordered.length" class="delivery-empty">Trenutno ni izdelkov na poti.</div><div v-else class="delivery-list"><article v-for="item in ordered" :key="item.id" class="delivery-item"><div><strong>{{item.products.name}}</strong><small>{{item.delivery.suppliers?.name}} · {{item.quantity}} {{item.products.unit}}</small></div><div class="delivery-order-side"><time><small>Predvidena dostava</small>{{formatDate(item.delivery.delivery_date)}}</time><TrashButton :disabled="saving" :label="`Odstrani naročilo za ${item.products.name}`" @click="pendingDeleteItem=item" /></div></article></div>
     </template>
     <template v-else>
       <div class="section-heading"><div><h2>Nova zaloga</h2><p class="muted">Potrdite prejete količine ali jih dodajte ročno</p></div><button @click="showManualForm=!showManualForm">Dodaj izdelek</button></div>
       <form v-if="showManualForm" class="card stack delivery-form" @submit.prevent="addManualStock"><label>Izdelek<select v-model="manualProductId"><option value="">Izberite izdelek</option><option v-for="p in products" :key="p.id" :value="p.id">{{p.name}} ({{p.unit}})</option></select></label><label>Nova količina<input v-model="manualQuantity" type="number" min="0.001" step="0.001" inputmode="decimal" required /></label><div class="form-actions"><button type="button" class="secondary" @click="showManualForm=false">Prekliči</button><button :disabled="saving">Dodaj zalogo</button></div></form>
-      <div v-if="!awaitingReceipt.length" class="delivery-empty">Ni novih dobav, ki čakajo na potrditev.</div><div v-else class="delivery-list"><article v-for="item in awaitingReceipt" :key="item.id" class="delivery-item receipt-item"><div class="receipt-heading"><span><strong>{{item.products.name}}</strong><small>Naročeno: {{item.quantity}} {{item.products.unit}} · {{formatDate(item.delivery.delivery_date)}}</small></span><button class="trash-button" :disabled="saving" :aria-label="`Odstrani ${item.products.name}`" title="Odstrani iz nove zaloge" @click="discardReceipt(item)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 10v6M14 10v6"/></svg></button></div><div class="receipt-actions"><input v-model="receivedQuantities[item.id]" type="number" min="0.001" step="0.001" :aria-label="`Prejeta količina za ${item.products.name}`"/><span>{{item.products.unit}}</span><button :disabled="saving" @click="confirmReceipt(item)">Potrdi novo zalogo</button></div></article></div>
+      <div v-if="!awaitingReceipt.length" class="delivery-empty">Ni novih dobav, ki čakajo na potrditev.</div><div v-else class="delivery-list"><article v-for="item in awaitingReceipt" :key="item.id" class="delivery-item receipt-item"><div class="receipt-heading"><span><strong>{{item.products.name}}</strong><small>Naročeno: {{item.quantity}} {{item.products.unit}} · {{formatDate(item.delivery.delivery_date)}}</small></span><TrashButton :disabled="saving" :label="`Odstrani ${item.products.name} iz nove zaloge`" @click="pendingDeleteItem=item" /></div><div class="receipt-actions"><input v-model="receivedQuantities[item.id]" type="number" min="0.001" step="0.001" :aria-label="`Prejeta količina za ${item.products.name}`"/><span>{{item.products.unit}}</span><button :disabled="saving" @click="confirmReceipt(item)">Potrdi novo zalogo</button></div></article></div>
       <section v-if="receivedItems.length" class="received-history"><h2>Nazadnje potrjeno</h2><div class="delivery-list"><article v-for="item in receivedItems" :key="item.id" class="delivery-item"><div><strong>{{item.products.name}}</strong><small>+ {{item.quantity}} {{item.products.unit}}</small></div><time>{{formatDate(item.received_at)}}</time></article></div></section>
     </template>
+    <div v-if="pendingDeleteItem" class="detail-overlay"><article class="detail-card confirm-card"><h2>Odstranim {{pendingDeleteItem.products.name}}?</h2><p>Izdelek bo odstranjen iz naročenih oziroma čakajočih dobav. Tega dejanja ni mogoče razveljaviti.</p><div class="actions"><button class="secondary" :disabled="saving" @click="discardReceipt(pendingDeleteItem)">Da, izbriši</button><button @click="pendingDeleteItem=null">Prekliči</button></div></article></div>
   </section>
 </template>

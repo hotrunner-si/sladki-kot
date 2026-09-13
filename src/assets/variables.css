@@ -299,6 +299,15 @@ a:focus-visible {
   border-color: var(--color-border);
   box-shadow: var(--shadow-card);
 }
+.product-form--inline {
+  margin: 0;
+  border-width: 1px 0 0;
+  border-radius: 0;
+  box-shadow: inset 0 4px 12px rgb(0 0 0 / 4%);
+}
+.product-line--editing {
+  background: var(--color-surface-accent);
+}
 .product-search input {
   background: transparent;
 }
@@ -508,6 +517,11 @@ a:focus-visible {
 .trash-button { display: grid; flex: 0 0 auto; place-items: center; width: 38px; min-height: 38px; padding: 8px; color: var(--color-danger); background: var(--color-danger-soft); border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent); }
 .trash-button:hover { background: var(--color-danger-soft); }
 .trash-button svg { width: 18px; height: 18px; }
+.danger-button { color: white; background: var(--color-danger); }
+.danger-button:hover { background: var(--color-danger); }
+.delivery-order-side { display: flex; align-items: center; gap: 10px; }
+.history-detail-actions { display: flex; align-items: center; gap: 8px; }
+.history-detail-actions .trash-button { margin-left: auto; }
 
 /* Count workflow */
 .discard-count { color: var(--color-danger); background: var(--color-danger-soft); border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent); }

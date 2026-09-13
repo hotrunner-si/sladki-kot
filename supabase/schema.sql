@@ -15,14 +15,15 @@ create table public.suppliers (
 create table public.products (
   id uuid primary key default gen_random_uuid(), name text not null, category text not null, unit text not null,
   supplier_id uuid references public.suppliers(id) on delete restrict, lead_time_days integer check (lead_time_days >= 0),
-  safety_stock_days integer not null default 1 check (safety_stock_days >= 0), active boolean not null default true,
+  safety_stock_quantity numeric(12,3) not null default 0 check (safety_stock_quantity >= 0), active boolean not null default true,
   counting_unit text, alternative_unit text, alternative_unit_size numeric(12,3) check (alternative_unit_size > 0),
   count_step numeric(12,3) not null default 1 check (count_step > 0),
   sort_order integer not null default 0, created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
 create table public.inventory_counts (
   id uuid primary key default gen_random_uuid(), created_by uuid references auth.users(id) on delete set null default auth.uid(),
-  started_at timestamptz not null default now(), updated_at timestamptz not null default now(), submitted_at timestamptz,
+  started_at timestamptz not null default now(), updated_at timestamptz not null default now(), active_until timestamptz, submitted_at timestamptz,
+  last_edited_by uuid references auth.users(id) on delete set null default auth.uid(),
   submitted_by uuid references auth.users(id) on delete set null, completed_at timestamptz,
   status text not null default 'draft' check(status in ('draft','incomplete','submitted','completed')),
   notes text
@@ -56,7 +57,7 @@ create or replace function public.is_admin() returns boolean language sql stable
 create or replace function public.is_inventory() returns boolean language sql stable security definer set search_path = public as $$ select exists(select 1 from public.profiles where id = auth.uid() and role = 'inventory') $$;
 create or replace function public.touch_inventory_count() returns trigger language plpgsql security definer set search_path = public as $$ begin update public.inventory_counts set updated_at = now() where id = new.inventory_count_id; return new; end $$;
 create trigger count_items_touch_parent after insert or update on public.inventory_count_items for each row execute function public.touch_inventory_count();
-create or replace function public.expire_inventory_drafts() returns void language plpgsql security definer set search_path = public as $$ begin update public.inventory_counts set status = 'incomplete' where status = 'draft' and updated_at < now() - interval '10 minutes'; end $$;
+create or replace function public.expire_inventory_drafts() returns void language plpgsql security definer set search_path = public as $$ begin update public.inventory_counts set status = 'incomplete', active_until = null where status = 'draft' and ((active_until is not null and active_until < now()) or (active_until is null and updated_at < now() - interval '10 minutes')); end $$;
 grant execute on function public.expire_inventory_drafts() to authenticated;
 
 alter table public.profiles enable row level security; alter table public.suppliers enable row level security; alter table public.products enable row level security;
@@ -71,13 +72,13 @@ create policy "suppliers admin manage" on public.suppliers for all to authentica
 create policy "products active read" on public.products for select to authenticated using (active or public.is_admin());
 create policy "products admin manage" on public.products for all to authenticated using (public.is_admin()) with check (public.is_admin());
 -- Popisi: zaposleni lahko ustvarja in spreminja izključno svoj osnutek; zaključka ne more več odpreti za urejanje.
-create policy "counts visible read" on public.inventory_counts for select to authenticated using (public.is_admin() or created_by = auth.uid() or status <> 'draft');
-create policy "counts create own" on public.inventory_counts for insert to authenticated with check (created_by = auth.uid());
-create policy "counts update workflow" on public.inventory_counts for update to authenticated using (public.is_admin() or (created_by = auth.uid() and status = 'draft') or status = 'incomplete') with check (public.is_admin() or (created_by = auth.uid() and status in ('draft','submitted')));
-create policy "counts delete own draft" on public.inventory_counts for delete to authenticated using (public.is_admin() or (created_by = auth.uid() and status = 'draft'));
-create policy "count items visible read" on public.inventory_count_items for select to authenticated using (exists(select 1 from public.inventory_counts c where c.id = inventory_count_id and (public.is_admin() or c.created_by = auth.uid() or c.status <> 'draft')));
-create policy "count items own draft write" on public.inventory_count_items for insert to authenticated with check (exists(select 1 from public.inventory_counts c where c.id = inventory_count_id and c.created_by = auth.uid() and c.status = 'draft'));
-create policy "count items own draft update" on public.inventory_count_items for update to authenticated using (exists(select 1 from public.inventory_counts c where c.id = inventory_count_id and c.created_by = auth.uid() and c.status = 'draft')) with check (exists(select 1 from public.inventory_counts c where c.id = inventory_count_id and c.created_by = auth.uid() and c.status = 'draft'));
+create policy "counts visible read" on public.inventory_counts for select to authenticated using (public.is_admin() or created_by = auth.uid() or last_edited_by = auth.uid() or status <> 'draft');
+create policy "counts create own" on public.inventory_counts for insert to authenticated with check (created_by = auth.uid() and last_edited_by = auth.uid());
+create policy "counts update workflow" on public.inventory_counts for update to authenticated using (public.is_admin() or (last_edited_by = auth.uid() and status = 'draft') or status = 'incomplete') with check (public.is_admin() or (last_edited_by = auth.uid() and status in ('draft','submitted')));
+create policy "counts delete own open" on public.inventory_counts for delete to authenticated using (public.is_admin() or (last_edited_by = auth.uid() and status in ('draft','incomplete')));
+create policy "count items visible read" on public.inventory_count_items for select to authenticated using (exists(select 1 from public.inventory_counts c where c.id = inventory_count_id and (public.is_admin() or c.created_by = auth.uid() or c.last_edited_by = auth.uid() or c.status <> 'draft')));
+create policy "count items own draft write" on public.inventory_count_items for insert to authenticated with check (exists(select 1 from public.inventory_counts c where c.id = inventory_count_id and c.last_edited_by = auth.uid() and c.status = 'draft'));
+create policy "count items own draft update" on public.inventory_count_items for update to authenticated using (exists(select 1 from public.inventory_counts c where c.id = inventory_count_id and c.last_edited_by = auth.uid() and c.status = 'draft')) with check (exists(select 1 from public.inventory_counts c where c.id = inventory_count_id and c.last_edited_by = auth.uid() and c.status = 'draft'));
 -- Dobave vidi in ureja samo administrator.
 create policy "deliveries admin manage" on public.deliveries for all to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy "delivery items admin manage" on public.delivery_items for all to authenticated using (public.is_admin()) with check (public.is_admin());
