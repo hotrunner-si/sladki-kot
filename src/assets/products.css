@@ -11,6 +11,8 @@
 .products-header h1 {
   font-size: 2.1rem;
 }
+.products-header-actions { display: flex; align-items: center; gap: 8px; }
+.export-button { min-height: 42px; padding: 9px 12px; white-space: nowrap; }
 .add-product {
   display: flex;
   align-items: center;
@@ -158,4 +160,8 @@
   background: #fff;
   border: 1px dashed #cbd8c8;
   border-radius: 12px;
+}
+@media (max-width: 460px) {
+  .products-header { align-items: stretch; flex-direction: column; }
+  .products-header-actions { justify-content: flex-start; }
 }

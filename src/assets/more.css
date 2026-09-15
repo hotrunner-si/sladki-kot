@@ -102,6 +102,12 @@
   justify-content: center;
   gap: 8px;
 }
-.signout-button span {
-  font-size: 1.15rem;
+.signout-button .logout-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
