@@ -583,6 +583,7 @@ a:focus-visible {
 .schedule-overview-day time { color: var(--color-text); font-weight: 800; }
 .schedule-overview-day strong { color: var(--color-primary-strong); white-space: nowrap; }
 .schedule-overview-day small { grid-column: 1 / -1; color: var(--color-text-muted); }
+.schedule-workers-display { grid-column: 2; grid-row: 1; display: block; padding: 8px 10px; color: var(--color-primary-strong); text-align: right; background: var(--color-accent-soft); border-radius: var(--radius-sm); font-size: .9rem; font-weight: 750; }
 .schedule-overview-day--weekend time, .schedule-day--weekend h2 { color: var(--color-danger); }
 .schedule-overview-day--future { opacity: .59; }
 .schedule-day--saved { background: var(--color-accent-soft); }
@@ -591,6 +592,9 @@ a:focus-visible {
 .schedule-worker-chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .schedule-worker-chips > span { display: inline-flex; align-items: center; gap: 5px; padding: 5px 7px 5px 9px; color: var(--color-primary-strong); background: var(--color-accent-soft); border-radius: 999px; font-size: .8rem; font-weight: 700; }
 .schedule-worker-chips button { display: grid; place-items: center; width: 19px; min-height: 19px; padding: 0; color: var(--color-primary-strong); background: transparent; border: 0; font-size: 1.05rem; }
+.schedule-day--saved { position: relative; }
+.schedule-day .schedule-workers-display { grid-column: auto; grid-row: auto; justify-self: end; padding-right: 46px; }
+.schedule-day--saved .schedule-pencil { position: absolute; right: 17px; bottom: 17px; }
 
 /* Contextual help */
 .help-button { display: grid; place-items: center; width: 36px; min-width: 36px; min-height: 36px; padding: 0; color: var(--color-primary-strong); background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 50%; font-size: 1rem; font-weight: 850; }
